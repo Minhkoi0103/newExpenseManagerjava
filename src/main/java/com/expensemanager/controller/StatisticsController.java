@@ -2,6 +2,7 @@ package com.expensemanager.controller;
 
 import com.expensemanager.database.ExpenseDAO;
 import com.expensemanager.model.Expense;
+import com.expensemanager.model.GetMax;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,10 +18,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StatisticsController {
     private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
@@ -40,23 +38,27 @@ public class StatisticsController {
     }
 
 
+
     public void startStatisticDaily(String date) {
         try {
+            List<Expense> expenses = ExpenseDAO.getExpensesByDate(date);
+
             Stage stage = new Stage();
-            // Tạo TabPane chính
             TabPane tabPaneStatisticDaily = new TabPane();
 
-            // Tạo Tab 1 - Labels
-            Tab tab1 = new Tab("Các Label");
+            // Tạo Tab 1 - Tổng quan
+            Tab tab1 = new Tab("Tổng quan");
             VBox labelsContainer = new VBox(10);
             labelsContainer.setPadding(new Insets(20));
 
-            Label label1 = new Label("Đây là Label 1");
-            Label label2 = new Label("Đây là Label 2");
-            Label label3 = new Label("Đây là Label 3");
-            Label label4 = new Label("Đây là Label 4");
+            // Thêm các thành phần vào container
+            labelsContainer.getChildren().addAll(
+                createTitleLabel(date),
+                createOverviewBox(expenses, date),
+                createDetailTitle(),
+                createCategoryDetails(expenses, date)
+            );
 
-            labelsContainer.getChildren().addAll(label1, label2, label3, label4);
             tab1.setContent(labelsContainer);
 
             // Tạo Tab 2 - Biểu đồ tròn
@@ -64,7 +66,7 @@ public class StatisticsController {
             VBox pieChartContainer = new VBox(10);
             pieChartContainer.setPadding(new Insets(20));
 
-            PieChart pieChart = createPieChart(date);
+            PieChart pieChart = createPieChart(date, expenses);
 
             pieChartContainer.getChildren().add(pieChart);
             tab2.setContent(pieChartContainer);
@@ -74,7 +76,7 @@ public class StatisticsController {
             VBox barChartContainer = new VBox(10);
             barChartContainer.setPadding(new Insets(20));
 
-            BarChart<String, Number> barChart = createBarChart(date);
+            BarChart<String, Number> barChart = createBarChart(date,expenses);
 
             barChartContainer.getChildren().add(barChart);
             tab3.setContent(barChartContainer);
@@ -89,15 +91,82 @@ public class StatisticsController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Lỗi khi hiển thị thống kê", e);
         }
     }
+    private Label createTitleLabel(String date) {
+        Label titleLabel = new Label("TỔNG QUAN CHI TIÊU NGÀY " + date);
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        titleLabel.setPadding(new Insets(0, 0, 10, 0));
+        return titleLabel;
+    }
 
-    private PieChart createPieChart(String date) {
+    private VBox createOverviewBox(List<Expense> expenses, String date) {
+        VBox overviewBox = new VBox(5);
+        overviewBox.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-radius: 5;");
+
+        Label totalLabel = new Label("Tổng số tiền chi tiêu: " + ExpenseDAO.getTotalExpensesByDate(date));
+        totalLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        String maxCategory = GetMax.getMaxCategory(expenses);
+        Label maxCategoryLabel = new Label("Danh mục chi tiêu nhiều nhất: " + maxCategory);
+        maxCategoryLabel.setStyle("-fx-font-size: 14px;");
+
+        Label maxCategoryCount = new Label("Số lần chi tiêu: " + ExpenseDAO.getCategoryCountByDate(maxCategory, date) + " lần");
+        maxCategoryCount.setStyle("-fx-font-size: 14px;");
+
+        Label maxCategoryAmount = new Label("Tổng số tiền: " + ExpenseDAO.getTotalExpensesByCategory(maxCategory));
+        maxCategoryAmount.setStyle("-fx-font-size: 14px;");
+
+        overviewBox.getChildren().addAll(totalLabel, maxCategoryLabel, maxCategoryCount, maxCategoryAmount);
+        return overviewBox;
+    }
+
+    private Label createDetailTitle() {
+        Label detailTitle = new Label("CHI TIẾT THEO DANH MỤC");
+        detailTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        detailTitle.setPadding(new Insets(10, 0, 5, 0));
+        return detailTitle;
+    }
+
+    private VBox createCategoryDetails(List<Expense> expenses, String date) {
+        VBox categoryDetails = new VBox(5);
+        categoryDetails.setStyle("-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-radius: 5;");
+
+        // Lấy danh sách các category duy nhất
+        Set<String> categories = new HashSet<>();
+        for (Expense expense : expenses) {
+            categories.add(expense.getCategory());
+        }
+
+        // Thêm thông tin chi tiết cho mỗi category
+        for (String category : categories) {
+            int count = ExpenseDAO.getCategoryCountByDate(category, date);
+            String amount = ExpenseDAO.getTotalExpensesByCategory(category);
+
+            VBox categoryBox = createCategoryBox(category, count, amount);
+            categoryDetails.getChildren().add(categoryBox);
+        }
+
+        return categoryDetails;
+    }
+
+    private VBox createCategoryBox(String category, int count, String amount) {
+        Label categoryLabel = new Label(category);
+        categoryLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+
+        Label countLabel = new Label("Số lần chi tiêu: " + count + " lần");
+        Label amountLabel = new Label("Tổng số tiền: " + amount);
+
+        VBox categoryBox = new VBox(3);
+        categoryBox.setPadding(new Insets(5, 0, 5, 10));
+        categoryBox.getChildren().addAll(categoryLabel, countLabel, amountLabel);
+
+        return categoryBox;
+    }
+
+    private PieChart createPieChart(String date, List<Expense> expenses) {
         try {
-            // Lấy danh sách chi tiêu theo ngày
-            List<Expense> expenses = ExpenseDAO.getExpensesByDate(date);
-            
             if (expenses.isEmpty()) {
                 PieChart emptyChart = new PieChart();
                 emptyChart.setTitle("Không có dữ liệu chi tiêu cho ngày " + date);
@@ -142,11 +211,8 @@ public class StatisticsController {
         }
     }
 
-    private BarChart<String, Number> createBarChart( String date) {
+    private BarChart<String, Number> createBarChart(String date, List<Expense> expenses) {
         try {
-            // Lấy tất cả chi tiêu
-            List<Expense> expenses = ExpenseDAO.getExpensesByDate(date);
-            
             if (expenses.isEmpty()) {
                 BarChart<String, Number> emptyChart = new BarChart<>(new CategoryAxis(), new NumberAxis());
                 emptyChart.setTitle("Không có dữ liệu chi tiêu");
@@ -191,5 +257,4 @@ public class StatisticsController {
             return errorChart;
         }
     }
-
 } 

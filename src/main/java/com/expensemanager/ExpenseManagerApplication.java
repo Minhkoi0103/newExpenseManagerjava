@@ -1,9 +1,5 @@
 package com.expensemanager;
 
-import com.expensemanager.database.DatabaseManager;
-import com.expensemanager.database.ExpenseDAO;
-import com.expensemanager.model.Expense;
-import com.expensemanager.util.DateUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -12,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
 
 public class ExpenseManagerApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(ExpenseManagerApplication.class);

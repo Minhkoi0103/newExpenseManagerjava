@@ -4,24 +4,17 @@ import com.expensemanager.database.DatabaseManager;
 import com.expensemanager.database.ExpenseDAO;
 import com.expensemanager.model.Expense;
 import com.expensemanager.util.AlertUtils;
-import com.expensemanager.util.DateUtil;
-import com.expensemanager.util.SortUtil;
+import com.expensemanager.model.DateUtil;
+import com.expensemanager.model.SortUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +23,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.expensemanager.util.CheckInputUtil.validateInput;
-import static com.expensemanager.util.SortUtil.SortOption.*;
+import static com.expensemanager.model.CheckInputUtil.validateInput;
+import static com.expensemanager.model.SortUtil.SortOption.*;
 
 public class HomeExpenseManagerController implements Initializable {
     public static final Logger logger = LoggerFactory.getLogger(HomeExpenseManagerController.class);

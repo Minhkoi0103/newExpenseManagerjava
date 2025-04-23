@@ -1,4 +1,6 @@
-package com.expensemanager.util;
+package com.expensemanager.model;
+
+import com.expensemanager.util.AlertUtils;
 
 import java.time.LocalDate;
 

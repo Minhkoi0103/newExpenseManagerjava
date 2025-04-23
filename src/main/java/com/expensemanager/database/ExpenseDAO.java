@@ -17,30 +17,6 @@ import static com.expensemanager.database.DatabaseManager.getConnection;
 public class ExpenseDAO {
     private static final Logger logger = LoggerFactory.getLogger(ExpenseDAO.class);
 
-    /*public static void addExpense(com.expensemanager.model.Expense expense) {
-        String sql = "INSERT INTO expenses(amount, category, date) VALUES(?,?,?)";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            String formattedAmount = NumberFormat.getInstance(Locale.US)
-                    .format(Double.parseDouble(expense.getAmount()));
-
-            pstmt.setString(1, formattedAmount);
-            pstmt.setString(2, expense.getCategory());
-            pstmt.setString(3, expense.getDate());
-
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows > 0) {
-                logger.info("Added new expense: amount={}, category={}, date={}",
-                        expense.getAmount(), expense.getCategory(), expense.getDate());
-            }
-        } catch (SQLException e) {
-            logger.error("Error adding expense", e);
-        } finally {
-            closeConnection();
-        }
-    }*/
-
     public static void addExpense(com.expensemanager.model.Expense expense) {
         String sql = "INSERT INTO expenses(id,amount, category, date) VALUES(?,?,?,?)";
         try (Connection conn = getConnection();
@@ -171,7 +147,7 @@ public class ExpenseDAO {
             while (rs.next()) {
                 Expense expense = new Expense(
                         rs.getString("id"),
-                        rs.getString("amount").replaceAll(",",""),
+                        rs.getString("amount").replaceAll(",", ""),
                         rs.getString("category"),
                         rs.getString("date")
                 );
@@ -179,7 +155,7 @@ public class ExpenseDAO {
             }
         } catch (SQLException e) {
             logger.error("Error getting expenses by category", e);
-        }finally {
+        } finally {
             closeConnection();
         }
         return expenses;
@@ -262,4 +238,112 @@ public class ExpenseDAO {
         }
         return 0.0;
     }
-} 
+
+    public static String getTotalExpensesByDate(String date) {
+        String sql = "SELECT SUM(amount) as total FROM expenses WHERE date = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set giá trị cho tham số ngày
+            pstmt.setString(1, date);
+
+            // Thực thi truy vấn
+            ResultSet rs = pstmt.executeQuery();
+
+            // Kiểm tra nếu có dữ liệu trả về
+            if (rs.next()) {
+                return String.valueOf(rs.getDouble("total")); // trả về tổng chi tiêu dạng String
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting total expenses for date: " + date, e);
+        } finally {
+            closeConnection(); // Đảm bảo đóng kết nối sau khi xong
+        }
+
+        // Trả về "0.0" nếu không có chi
+        return "0.0";
+    }
+
+    public static int getCategoryCount(String category) {
+        String sql = "SELECT COUNT(*) as count FROM expenses WHERE category = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set giá trị cho tham số category
+            pstmt.setString(1, category);
+
+            // Thực thi truy vấn
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("count"); // Trả về số lượng bản ghi của category
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting category count for category: " + category, e);
+        } finally {
+            closeConnection();
+        }
+
+        return 0; // Trả về 0 nếu không có chi tiêu cho category đó
+    }
+
+    public static int getCategoryCountByDate(String category, String date) {
+        String sql = "SELECT COUNT(*) as count FROM expenses WHERE category = ? AND date = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set giá trị cho tham số category và date
+            pstmt.setString(1, category);
+            pstmt.setString(2, date);
+
+            // Thực thi truy vấn
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("count"); // Trả về số lượng bản ghi của category trong ngày
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting category count for category: " + category + " on date: " + date, e);
+        } finally {
+            closeConnection();
+        }
+
+        return 0; // Trả về 0 nếu không có chi tiêu cho category trong ngày đó
+    }
+
+
+    public static String getTotalExpensesByCategory(String category) {
+        String sql = "SELECT SUM(amount) as total FROM expenses WHERE category = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set giá trị cho tham số category
+            pstmt.setString(1, category);
+
+            // Thực thi truy vấn
+            ResultSet rs = pstmt.executeQuery();
+
+            // Kiểm tra nếu có dữ liệu trả về
+            if (rs.next()) {
+                return String.valueOf(rs.getDouble("total")); // trả về tổng chi tiêu theo category
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting total expenses for category: " + category, e);
+        } finally {
+            closeConnection(); // Đảm bảo đóng kết nối sau khi xong
+        }
+
+        // Trả về "0.0" nếu không có chi tiêu trong category
+        return "0.0";
+    }
+
+
+}

@@ -1,9 +1,8 @@
-package com.expensemanager.util;
+package com.expensemanager.model;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;

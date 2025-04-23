@@ -1,11 +1,8 @@
 package com.expensemanager.model;
 
-import com.expensemanager.util.DateUtil;
 import javafx.beans.property.SimpleStringProperty;
 
-import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.util.Locale;
 
 public class Expense {
     private final String id;
