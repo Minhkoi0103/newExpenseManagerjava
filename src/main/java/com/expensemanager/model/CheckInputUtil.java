@@ -1,7 +1,5 @@
 package com.expensemanager.model;
 
-import com.expensemanager.util.AlertUtils;
-
 import java.time.LocalDate;
 
 public class CheckInputUtil {

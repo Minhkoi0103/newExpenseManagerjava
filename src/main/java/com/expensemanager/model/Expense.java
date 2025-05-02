@@ -40,7 +40,6 @@ public class Expense {
 
 
     public Expense(String amount, String category) {
-        //this.id = 0;
         this.id = System.currentTimeMillis()+"";
         this.amount = new SimpleStringProperty(amount);
 

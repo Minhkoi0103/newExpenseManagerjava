@@ -161,6 +161,35 @@ public class ExpenseDAO {
         return expenses;
     }
 
+    public static List<Expense> getExpensesByDateRange(String startDate, String endDate) {
+        List<Expense> expenses = new ArrayList<>();
+        String sql = "SELECT * FROM expenses WHERE date BETWEEN ? AND ? ORDER BY date DESC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Expense expense = new Expense(
+                        rs.getString("id"),
+                        rs.getString("amount").replaceAll(",", ""),
+                        rs.getString("category"),
+                        rs.getString("date")
+                );
+                expenses.add(expense);
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting expenses by date range", e);
+        } finally {
+            closeConnection();
+        }
+        return expenses;
+    }
+
+
     public static boolean updateExpense(Expense expense) {
         String sql = "UPDATE expenses SET amount = ?, category = ?, date = ? WHERE id = ?";
 
@@ -266,6 +295,31 @@ public class ExpenseDAO {
         return "0.0";
     }
 
+    public static String getTotalExpensesByDateRange(String startDate, String endDate) {
+        String sql = "SELECT SUM(amount) as total FROM expenses WHERE date BETWEEN ? AND ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return String.valueOf(rs.getDouble("total"));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting total expenses for date range: " + startDate + " to " + endDate, e);
+        } finally {
+            closeConnection();
+        }
+
+        return "0.0";
+    }
+
+
     public static int getCategoryCount(String category) {
         String sql = "SELECT COUNT(*) as count FROM expenses WHERE category = ?";
 
@@ -317,6 +371,32 @@ public class ExpenseDAO {
         return 0; // Trả về 0 nếu không có chi tiêu cho category trong ngày đó
     }
 
+    public static int getCategoryCountByDateRange(String category, String startDate, String endDate) {
+        String sql = "SELECT COUNT(*) as count FROM expenses WHERE category = ? AND date BETWEEN ? AND ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, category);
+            pstmt.setString(2, startDate);
+            pstmt.setString(3, endDate);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("count"); // Số bản ghi của category trong khoảng thời gian
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting category count for category: " + category + " from " + startDate + " to " + endDate, e);
+        } finally {
+            closeConnection();
+        }
+
+        return 0;
+    }
+
+
 
     public static String getTotalExpensesByCategory(String category) {
         String sql = "SELECT SUM(amount) as total FROM expenses WHERE category = ?";
@@ -344,6 +424,32 @@ public class ExpenseDAO {
         // Trả về "0.0" nếu không có chi tiêu trong category
         return "0.0";
     }
+
+    public static String getTotalExpensesByCategoryInDateRange(String category, String startDate, String endDate) {
+        String sql = "SELECT SUM(amount) as total FROM expenses WHERE category = ? AND date BETWEEN ? AND ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, category);
+            pstmt.setString(2, startDate);
+            pstmt.setString(3, endDate);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return String.valueOf(rs.getDouble("total"));
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error getting total expenses for category: " + category + " from " + startDate + " to " + endDate, e);
+        } finally {
+            closeConnection();
+        }
+
+        return "0.0";
+    }
+
 
 
 }

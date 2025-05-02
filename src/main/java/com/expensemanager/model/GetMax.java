@@ -23,7 +23,9 @@ public class GetMax {
                         Expense::getCategory,
                         Collectors.summingDouble(expense -> Double.parseDouble(expense.getAmount()))
                 ));
-
+        if (expenses.isEmpty()) {
+            return "Không có dữ liệu";
+        }
         return Collections.max(
                 totalByCategory.entrySet(),
                 Map.Entry.comparingByValue()

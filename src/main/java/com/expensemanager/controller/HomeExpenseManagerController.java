@@ -3,7 +3,7 @@ package com.expensemanager.controller;
 import com.expensemanager.database.DatabaseManager;
 import com.expensemanager.database.ExpenseDAO;
 import com.expensemanager.model.Expense;
-import com.expensemanager.util.AlertUtils;
+import com.expensemanager.model.AlertUtils;
 import com.expensemanager.model.DateUtil;
 import com.expensemanager.model.SortUtil;
 import javafx.collections.FXCollections;
@@ -280,6 +280,8 @@ public class HomeExpenseManagerController implements Initializable {
 
 
     public void handleShowMonthlyChart(ActionEvent actionEvent) {
+        StatisticsController tabPaneStatisticDateRange = new StatisticsController();
+        tabPaneStatisticDateRange.startStatisticDateRange(DateUtil.chooseDate(),DateUtil.chooseDate());
     }
 
     public void handleShowCategoryChart(ActionEvent actionEvent) {
