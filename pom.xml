@@ -70,7 +70,8 @@
                             <!-- Specify the main class -->
                             <archive>
                                 <manifestEntries>
-                                    <Main-Class>com.expensemanager.ExpenseManagerApplication</Main-Class> <!-- Thay 'com.expensemanager.ExpenseManagerApplication' bằng lớp chính của bạn -->
+                                    <Main-Class>com.expensemanager.ExpenseManagerApplication
+                                    </Main-Class> <!-- Thay 'com.expensemanager.ExpenseManagerApplication' bằng lớp chính của bạn -->
                                 </manifestEntries>
                             </archive>
                         </configuration>
@@ -78,6 +79,14 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>com.expensemanager.ExpenseManagerApplication</mainClass>
+                </configuration>
+            </plugin>
             <!-- Plugin for JavaFX packaging (creating JAR with JavaFX runtime included) -->
 
         </plugins>
